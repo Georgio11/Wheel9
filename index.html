@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@800&family=Montserrat:wght@900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="wrapper">
+        <div class="logo"><img src="images/logo.webp" alt="logo"></div>
+        <div class="info">Number of tries: &nbsp; <span class="tries"> 3</span></div>
+        <div class="wheel_wrapper">
+            <div class="wheel_container">
+                <div class="wheel_frame">
+                    <div class="wheel"></div>
+                </div>
+                <div class="btn"></div>
+                <div class="aviator"><img src="images/aviator.webp" alt="aviator"></div>
+            </div>
+        </div>
+        <div class="partners">
+            <img src="images/partners.webp" alt="partners">
+        </div>
+
+        <div class="modal_container">
+            <div class="modal">
+                <p class="congratulation">Congratulation!</p>
+                <p class="bonus">100% BONUS</p>
+                <p class="money">1.00.000₹</p>
+                <div class="btns">
+                    <button>Spin again</button>
+                    <button>Get the reward</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let wrapper = document.querySelector(".wrapper");
+        let wheel = document.querySelector('.wheel');
+        let btn = document.querySelector('.btn');
+        let tries = document.querySelector('.tries');
+        let modal = document.querySelector('.modal_container');
+        let bonus = document.querySelector('.bonus');
+        let money = document.querySelector('.money');
+        let modalBtn = document.querySelector('.btns button:nth-child(1)');
+        let winBtn = document.querySelector('.btns button:nth-child(2)');
+        let wheelFrame = document.querySelector('.wheel_container');
+        let wheelWidth = wheelFrame.offsetWidth;
+
+        let spinCount = 3;
+
+        function adaptationElements() {
+            const aspectRatio = window.innerWidth / window.innerHeight;
+            let aspectClass;
+
+            if (aspectRatio >= 2) {
+                aspectClass = 'modificate1';
+            } else if (aspectRatio >= 1.5) {
+                aspectClass = 'modificate2';
+            } else if (aspectRatio > 1) {
+                aspectClass = 'modificate3';
+            } else {
+                aspectClass = 'modificate4';
+            }
+
+            wrapper.className = `wrapper ${aspectClass}`;
+        }
+
+        adaptationElements();
+        window.addEventListener('resize', adaptationElements);
+
+        window.addEventListener('resize', function() {
+            wheelFrame.style.height = wheelWidth + 'px';
+        });
+
+        window.dispatchEvent(new Event('resize'));
+
+        function changeWheel() {
+           if(window.innerHeight <= 1010) {
+               wheelFrame.style.height = 55 + 'vh';
+           }
+        }
+
+        changeWheel();
+        window.addEventListener('resize', changeWheel);
+
+
+        function promiseAfterTimeout(seconds) {
+            return new Promise(function (resolve) {
+                setTimeout(() => resolve(), seconds * 1000);
+            });
+        };
+
+        function rotateWheel(degr) {
+            wheel.style.transform = 'rotate(' + degr + 'deg)';
+            return promiseAfterTimeout(5);
+        };
+
+        function launchSpin(degrees) {
+            currentRotation += degrees;
+            return rotateWheel(currentRotation);
+        };
+
+        let spinState = {
+            clickedOnce: false,
+            count: 0
+        };
+
+        let currentRotation = 0;
+
+        let isAnimating = false;
+
+        function setButtonsState(disabled, cursorStyle) {
+            btn.disabled = disabled;
+            btn.style.cursor = cursorStyle;
+        };
+
+        function setClasses() {
+            modal.classList.add('active');
+            setInterval(()=> {
+                modal.classList.add('opacity');
+            }, 800)
+        }
+
+        btn.addEventListener('click', function() {
+            if (!isAnimating && spinState.count < 3) {
+                isAnimating = true;
+                setButtonsState(true, 'default');
+
+                if (!spinState.clickedOnce) {
+                    launchSpin(2950).then(() => {
+                        spinState.clickedOnce = true;
+                        spinState.count++;
+                        setButtonsState(false, 'pointer');
+                        isAnimating = false;
+                        setClasses();
+                    });
+                } 
+
+                spinCount--;
+                tries.innerHTML = spinCount;
+            }
+        });
+
+        modalBtn.addEventListener('click', ()=> {
+            modal.classList.remove('active');
+            modal.classList.remove('opacity');
+            if (spinCount == 2){
+                launchSpin(2790).then(() => {
+                    modal.classList.add('active');
+                    spinState.count++;
+                    setButtonsState(false, 'pointer');
+                    isAnimating = false;
+                    setClasses();
+                    bonus.innerHTML = '150% BONUS';
+                    money.innerHTML = '75.000₹';
+                });
+            } else {
+                launchSpin(2790).then(() => {
+                    spinState.count++;
+                    setButtonsState(false, 'pointer');
+                    isAnimating = false;
+                    setClasses();
+                    bonus.innerHTML = '200% BONUS';
+                    money.innerHTML = '50.000₹';
+                    winBtn.classList.add('active');
+                    modalBtn.classList.add('active');
+                });
+            }
+            spinCount--;
+            tries.innerHTML = spinCount;
+        })
+    </script>
+</body>
+</html>
